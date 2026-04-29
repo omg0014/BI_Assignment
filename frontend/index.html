@@ -1,0 +1,1361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bharat Intelligence — Wage Reconciliation</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #0d0f14;
+            --surface: #13161e;
+            --surface2: #1a1e28;
+            --border: #252a38;
+            --border2: #2e3448;
+            --text: #e2e6f0;
+            --muted: #6b7394;
+            --accent: #f5a623;
+            --red: #ff4f4f;
+            --green: #3ecf8e;
+            --yellow: #f5a623;
+            --blue: #4f90ff;
+            --font-mono: 'IBM Plex Mono', monospace;
+            --font-sans: 'IBM Plex Sans', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-sans);
+            font-size: 14px;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+        .header {
+            border-bottom: 1px solid var(--border);
+            padding: 18px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--surface);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        .header h1 {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            color: var(--text);
+            text-transform: uppercase;
+        }
+
+        .header-sub {
+            font-size: 11px;
+            color: var(--muted);
+            font-family: var(--font-mono);
+        }
+
+        .status-badge {
+            background: #1a2a1a;
+            border: 1px solid #2a4a2a;
+            color: var(--green);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 2px;
+        }
+
+        /* MAIN LAYOUT */
+        .main {
+            padding: 28px 32px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* SUMMARY CARDS */
+        .cards-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 18px 20px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .card:hover {
+            border-color: var(--border2);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+        }
+
+        .card.red::before {
+            background: var(--red);
+        }
+
+        .card.green::before {
+            background: var(--green);
+        }
+
+        .card.yellow::before {
+            background: var(--yellow);
+        }
+
+        .card.blue::before {
+            background: var(--blue);
+        }
+
+        .card.muted::before {
+            background: var(--muted);
+        }
+
+        .card-label {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            margin-bottom: 10px;
+        }
+
+        .card-value {
+            font-family: var(--font-mono);
+            font-size: 26px;
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        .card-value.red {
+            color: var(--red);
+        }
+
+        .card-value.green {
+            color: var(--green);
+        }
+
+        .card-value.yellow {
+            color: var(--yellow);
+        }
+
+        .card-value.blue {
+            color: var(--blue);
+        }
+
+        .card-sub {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        /* SECTION HEADER */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .section-title {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+        }
+
+        /* CONTROLS */
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        select,
+        input[type="text"] {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            color: var(--text);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            padding: 7px 12px;
+            border-radius: 3px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        select:focus,
+        input[type="text"]:focus {
+            border-color: var(--accent);
+        }
+
+        input[type="text"] {
+            width: 200px;
+        }
+
+        .btn {
+            background: transparent;
+            border: 1px solid var(--border2);
+            color: var(--muted);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 7px 14px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(245, 166, 35, 0.07);
+        }
+
+        .row-count {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--muted);
+            margin-left: auto;
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 10px 20px;
+            cursor: pointer;
+            color: var(--muted);
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: all 0.15s;
+        }
+
+        .tab:hover {
+            color: var(--text);
+        }
+
+        .tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* TABLES */
+        .table-wrapper {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead tr {
+            background: var(--surface2);
+            border-bottom: 1px solid var(--border2);
+        }
+
+        th {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            padding: 10px 14px;
+            text-align: left;
+            cursor: pointer;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        th:hover {
+            color: var(--text);
+        }
+
+        th.sorted {
+            color: var(--accent);
+        }
+
+        th .sort-icon {
+            margin-left: 4px;
+            opacity: 0.5;
+        }
+
+        th.sorted .sort-icon {
+            opacity: 1;
+            color: var(--accent);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.1s;
+            cursor: pointer;
+        }
+
+        tbody tr:hover {
+            background: var(--surface2);
+        }
+
+        tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        tbody tr.selected {
+            background: rgba(245, 166, 35, 0.05);
+        }
+
+        td {
+            padding: 9px 14px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        td.text-right {
+            text-align: right;
+        }
+
+        .badge {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .badge-red {
+            background: rgba(255, 79, 79, 0.15);
+            color: var(--red);
+            border: 1px solid rgba(255, 79, 79, 0.3);
+        }
+
+        .badge-green {
+            background: rgba(62, 207, 142, 0.12);
+            color: var(--green);
+            border: 1px solid rgba(62, 207, 142, 0.25);
+        }
+
+        .badge-yellow {
+            background: rgba(245, 166, 35, 0.12);
+            color: var(--yellow);
+            border: 1px solid rgba(245, 166, 35, 0.25);
+        }
+
+        .badge-muted {
+            background: rgba(107, 115, 148, 0.15);
+            color: var(--muted);
+            border: 1px solid rgba(107, 115, 148, 0.25);
+        }
+
+        .tag {
+            display: inline-block;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            padding: 1px 6px;
+            border-radius: 2px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            color: var(--muted);
+            margin: 1px;
+        }
+
+        .tag.highlight {
+            color: var(--yellow);
+            border-color: rgba(245, 166, 35, 0.3);
+            background: rgba(245, 166, 35, 0.07);
+        }
+
+        /* DETAIL PANEL */
+        .layout-split {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 16px;
+            align-items: start;
+        }
+
+        .detail-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 20px;
+            position: sticky;
+            top: 80px;
+            display: none;
+        }
+
+        .detail-panel.visible {
+            display: block;
+        }
+
+        .detail-panel h3 {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--muted);
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 7px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 12px;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-key {
+            color: var(--muted);
+            font-family: var(--font-mono);
+            font-size: 11px;
+        }
+
+        .detail-val {
+            font-family: var(--font-mono);
+            font-weight: 600;
+        }
+
+        .detail-val.red {
+            color: var(--red);
+        }
+
+        .detail-val.green {
+            color: var(--green);
+        }
+
+        .detail-val.yellow {
+            color: var(--yellow);
+        }
+
+        .close-btn {
+            float: right;
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .close-btn:hover {
+            color: var(--text);
+        }
+
+        /* PAGINATION */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+        }
+
+        .pagination-info {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .pagination-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .page-btn {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            color: var(--muted);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .page-btn.current {
+            color: var(--accent);
+            border-color: var(--accent);
+            background: rgba(245, 166, 35, 0.07);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* LOADING / EMPTY */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--muted);
+            font-family: var(--font-mono);
+            font-size: 12px;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            gap: 10px;
+            color: var(--muted);
+            font-family: var(--font-mono);
+            font-size: 12px;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* BUGS PANEL */
+        .bugs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .bug-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--red);
+            border-radius: 4px;
+            padding: 16px 18px;
+        }
+
+        .bug-card.warning {
+            border-left-color: var(--yellow);
+        }
+
+        .bug-card.info {
+            border-left-color: var(--blue);
+        }
+
+        .bug-num {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--red);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 6px;
+        }
+
+        .bug-card.warning .bug-num {
+            color: var(--yellow);
+        }
+
+        .bug-card.info .bug-num {
+            color: var(--blue);
+        }
+
+        .bug-title {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .bug-desc {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .bug-impact {
+            margin-top: 10px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            padding: 6px 10px;
+            background: var(--surface2);
+            border-radius: 3px;
+            color: var(--text);
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border2);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--muted);
+        }
+
+        /* TOOLTIP */
+        [title] {
+            cursor: help;
+        }
+
+        /* EXPORT BTN */
+        .export-btn {
+            background: rgba(245, 166, 35, 0.1);
+            border: 1px solid rgba(245, 166, 35, 0.3);
+            color: var(--accent);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 7px 16px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .export-btn:hover {
+            background: rgba(245, 166, 35, 0.18);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <div class="header-left">
+            <div class="logo-dot"></div>
+            <div>
+                <div class="header h1"
+                    style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;">
+                    Bharat Intelligence</div>
+                <div class="header-sub">Wage Reconciliation · Ops Triage Dashboard</div>
+            </div>
+        </div>
+        <div id="lastRefresh" class="status-badge">● Loaded</div>
+    </div>
+
+    <div class="main">
+
+        <!-- SUMMARY CARDS -->
+        <div class="cards-row" id="summaryCards">
+            <div class="card red">
+                <div class="card-label">Workers Underpaid</div>
+                <div class="card-value red" id="c-underpaid">—</div>
+                <div class="card-sub">of 100 workers</div>
+            </div>
+            <div class="card yellow">
+                <div class="card-label">Total Owed (INR)</div>
+                <div class="card-value yellow" id="c-owed">—</div>
+                <div class="card-sub">across all months</div>
+            </div>
+            <div class="card blue">
+                <div class="card-label">Needs Review</div>
+                <div class="card-value blue" id="c-review">—</div>
+                <div class="card-sub">period-level rows</div>
+            </div>
+            <div class="card muted">
+                <div class="card-label">Overpaid Workers</div>
+                <div class="card-value" id="c-overpaid" style="color:var(--muted)">—</div>
+                <div class="card-sub">need claw back</div>
+            </div>
+            <div class="card green">
+                <div class="card-label">Exact Matches</div>
+                <div class="card-value green" id="c-exact">—</div>
+                <div class="card-sub">worker-month clean</div>
+            </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('shift')" id="tab-shift">Monthly Reconciliation</div>
+            <div class="tab" onclick="switchTab('worker')" id="tab-worker">Worker Summary</div>
+            <div class="tab" onclick="switchTab('bugs')" id="tab-bugs">Root Cause Analysis</div>
+        </div>
+
+        <!-- TAB: MONTHLY RECONCILIATION -->
+        <div id="view-shift">
+            <div class="controls">
+                <div class="filter-group">
+                    <span class="filter-label">Status</span>
+                    <select id="f-status" onchange="applyFilters()">
+                        <option value="all">All</option>
+                        <option value="underpaid">Underpaid</option>
+                        <option value="overpaid">Overpaid</option>
+                        <option value="exact">Exact Match</option>
+                        <option value="review">Needs Review</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">Month</span>
+                    <select id="f-month" onchange="applyFilters()">
+                        <option value="all">All Months</option>
+                        <option value="2025-01">Jan 2025</option>
+                        <option value="2025-02">Feb 2025</option>
+                        <option value="2025-03">Mar 2025</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">Phone</span>
+                    <input type="text" id="f-search" placeholder="Search phone..." oninput="applyFilters()" />
+                </div>
+                <button class="btn" onclick="clearFilters()">Clear</button>
+                <button class="export-btn" onclick="exportCSV()">↓ Export CSV</button>
+                <span class="row-count" id="rowCount">—</span>
+            </div>
+
+            <div class="layout-split" id="splitLayout">
+                <div>
+                    <div class="table-wrapper">
+                        <table id="recTable">
+                            <thead>
+                                <tr>
+                                    <th onclick="sortBy('phone_norm')" id="th-phone">Phone <span
+                                            class="sort-icon">↕</span></th>
+                                    <th onclick="sortBy('year_month')" id="th-month">Month <span
+                                            class="sort-icon">↕</span></th>
+                                    <th onclick="sortBy('shift_count')" id="th-shifts">Shifts <span
+                                            class="sort-icon">↕</span></th>
+                                    <th onclick="sortBy('expected_paise')" id="th-expected">Expected (₹) <span
+                                            class="sort-icon">↕</span></th>
+                                    <th onclick="sortBy('actual_paise')" id="th-actual">Actual (₹) <span
+                                            class="sort-icon">↕</span></th>
+                                    <th onclick="sortBy('delta_paise')" id="th-delta" class="sorted">Delta (₹) <span
+                                            class="sort-icon">↓</span></th>
+                                    <th>Status</th>
+                                    <th>Review Reason</th>
+                                    <th>Confidence</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination">
+                        <div class="pagination-info" id="pageInfo">—</div>
+                        <div class="pagination-btns" id="pageBtns"></div>
+                    </div>
+                </div>
+
+                <!-- DETAIL PANEL -->
+                <div class="detail-panel" id="detailPanel">
+                    <h3>Row Detail <button class="close-btn" onclick="closeDetail()">×</button></h3>
+                    <div id="detailContent"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: WORKER SUMMARY -->
+        <div id="view-worker" style="display:none">
+            <div class="controls">
+                <div class="filter-group">
+                    <span class="filter-label">Show</span>
+                    <select id="fw-status" onchange="applyWorkerFilters()">
+                        <option value="all">All Workers</option>
+                        <option value="underpaid">Underpaid</option>
+                        <option value="overpaid">Overpaid</option>
+                        <option value="exact">Exact Match</option>
+                    </select>
+                </div>
+                <button class="export-btn" onclick="exportWorkerCSV()">↓ Export CSV</button>
+                <span class="row-count" id="workerCount">—</span>
+            </div>
+            <div class="table-wrapper">
+                <table id="workerTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortWorker('phone_norm')">Phone <span class="sort-icon">↕</span></th>
+                            <th onclick="sortWorker('total_expected')">Expected Total (₹) <span
+                                    class="sort-icon">↕</span></th>
+                            <th onclick="sortWorker('total_actual')">Actual Total (₹) <span class="sort-icon">↕</span>
+                            </th>
+                            <th onclick="sortWorker('owed_inr')" class="sorted">Owed (₹) <span
+                                    class="sort-icon">↓</span></th>
+                            <th onclick="sortWorker('periods')">Periods <span class="sort-icon">↕</span></th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="workerBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB: BUGS -->
+        <div id="view-bugs" style="display:none">
+            <div class="bugs-grid">
+                <div class="bug-card">
+                    <div class="bug-num">Bug #1 · Critical</div>
+                    <div class="bug-title">Wage Rate Overlap — Data Entry / MH / Junior</div>
+                    <div class="bug-desc">The wage_rates table has 3 rows for the same role/state/seniority combo. Rows
+                        cover Jan–Feb28, Mar1+, and Mar10–Mar20 — the last window is a duplicate that conflicts with the
+                        second. Any shift in Mar 10–20 matches two rate rows. The pipeline took the latest
+                        effective_from, but the correct behavior should halt and alert.</div>
+                    <div class="bug-impact">10 rows flagged · review_reason: overlapping_rate</div>
+                </div>
+                <div class="bug-card warning">
+                    <div class="bug-num">Bug #2 · High</div>
+                    <div class="bug-title">Paise / INR Conversion Missing or Wrong</div>
+                    <div class="bug-desc">Wage rates are stored in INR (e.g. ₹300/hr) but bank transfers are in paise
+                        (30000 paise = ₹300). The reconciliation multiplies by 100 only if max rate &gt; 1000 — a
+                        heuristic that may fail on new rate tables. One worker has a Feb delta of ₹2.1L which is almost
+                        certainly a conversion artifact, not a real underpayment.</div>
+                    <div class="bug-impact">Worker 9413435240 · Feb delta = ₹2,11,655 (suspicious)</div>
+                </div>
+                <div class="bug-card warning">
+                    <div class="bug-num">Bug #3 · High</div>
+                    <div class="bug-title">Timezone Boundary Crosses Rate Change Date</div>
+                    <div class="bug-desc">Wage rates for Field Surveyor changed on Mar 15. vendor_b logs timestamps in
+                        UTC. A shift entered at 22:00 UTC Mar 14 is actually 03:30 IST Mar 15 — the wrong rate gets
+                        applied. 10 rows have date_mismatch between entered_at (IST-converted) and work_date, suggesting
+                        vendor_b wrote raw UTC timestamps.</div>
+                    <div class="bug-impact">10 rows flagged · review_reason: date_mismatch</div>
+                </div>
+                <div class="bug-card info">
+                    <div class="bug-num">Bug #4 · Medium</div>
+                    <div class="bug-title">Phone Normalization — 6 Formats, No Canonical ID</div>
+                    <div class="bug-desc">supervisor_logs has 6 phone formats: +91 XXXXXXXXXX, 91-XXXXXXXXXX,
+                        0-XXXXXXXXXX, 91XXXXXXXXXX, spaced (97882 08121), and bare 10-digit. Since worker_id is absent
+                        from logs, normalized phone is the only join key. Any phone that fails normalization causes a
+                        worker to be fully unmatched and unpaid.</div>
+                    <div class="bug-impact">Workers with UNKNOWN phone_norm → no_worker_match</div>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <div class="section-title">Reconciliation Flags Breakdown</div>
+            </div>
+            <div id="bugsBreakdown"></div>
+        </div>
+
+    </div>
+
+    <script>
+        // =====================
+        // DATA STORE
+        // =====================
+        let recData = [];
+        let workerData = [];
+        let filteredRec = [];
+        let filteredWorker = [];
+        let currentPage = 1;
+        const PAGE_SIZE = 25;
+        let sortCol = 'delta_paise';
+        let sortDir = -1;
+        let workerSortCol = 'owed_inr';
+        let workerSortDir = -1;
+        let selectedRow = null;
+
+        // =====================
+        // LOAD DATA FROM API (with CSV fallback)
+        // =====================
+        async function loadData() {
+            try {
+                // Try Flask API first
+                const [recResp, workerResp] = await Promise.all([
+                    fetch('http://127.0.0.1:5000/api/reconciliation'),
+                    fetch('http://127.0.0.1:5000/api/worker-summary')
+                ]);
+                if (!recResp.ok || !workerResp.ok) throw new Error('API not available');
+                recData = await recResp.json();
+                workerData = await workerResp.json();
+            } catch (e) {
+                // Fallback: try loading CSV files directly (must be in same folder)
+                try {
+                    recData = await loadCSV('reconciled_output.csv');
+                    workerData = await loadCSV('worker_summary.csv');
+                } catch (e2) {
+                    showInlineError();
+                    return;
+                }
+            }
+
+            parseNumeric(recData, ['expected_paise', 'actual_paise', 'delta_paise', 'delta_inr', 'shift_count']);
+            parseNumeric(workerData, ['total_expected', 'total_actual', 'total_delta', 'owed_inr', 'periods']);
+
+            renderSummary();
+            applyFilters();
+            applyWorkerFilters();
+            renderBugBreakdown();
+
+            document.getElementById('lastRefresh').textContent = '● ' + new Date().toLocaleTimeString('en-IN');
+        }
+
+        async function loadCSV(filename) {
+            const resp = await fetch(filename);
+            if (!resp.ok) throw new Error('CSV not found: ' + filename);
+            const text = await resp.text();
+            return parseCSVText(text);
+        }
+
+        function parseCSVText(text) {
+            const lines = text.trim().split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            return lines.slice(1).map(line => {
+                const vals = splitCSVLine(line);
+                const obj = {};
+                headers.forEach((h, i) => { obj[h] = vals[i] ? vals[i].replace(/"/g, '').trim() : ''; });
+                return obj;
+            });
+        }
+
+        function splitCSVLine(line) {
+            const result = []; let cur = ''; let inQ = false;
+            for (let c of line) {
+                if (c === '"') { inQ = !inQ; }
+                else if (c === ',' && !inQ) { result.push(cur); cur = ''; }
+                else cur += c;
+            }
+            result.push(cur);
+            return result;
+        }
+
+        function parseNumeric(data, cols) {
+            data.forEach(row => {
+                cols.forEach(col => {
+                    if (row[col] !== undefined && row[col] !== '' && row[col] !== 'nan') {
+                        row[col] = parseFloat(row[col]);
+                    } else {
+                        row[col] = NaN;
+                    }
+                });
+            });
+        }
+
+        function showInlineError() {
+            document.getElementById('recBody').innerHTML = `
+    <tr><td colspan="9" class="empty-state">
+      <strong style="color:var(--yellow)">Cannot load data.</strong><br/><br/>
+      Option A: Run Flask backend → <code style="background:var(--surface2);padding:2px 6px;border-radius:2px">python app.py</code> then refresh.<br/><br/>
+      Option B: Place <code>reconciled_output.csv</code> and <code>worker_summary.csv</code> in the same folder as this HTML file, then open via a local server:<br/>
+      <code style="background:var(--surface2);padding:2px 6px;border-radius:2px">python -m http.server 8080</code>
+    </td></tr>`;
+        }
+
+        // =====================
+        // SUMMARY CARDS
+        // =====================
+        function renderSummary() {
+            const underpaid = new Set(workerData.filter(w => w.total_delta > 0).map(w => w.phone_norm)).size;
+            const overpaid = new Set(workerData.filter(w => w.total_delta < 0).map(w => w.phone_norm)).size;
+            const exact = new Set(workerData.filter(w => w.total_delta === 0).map(w => w.phone_norm)).size;
+            const totalOwed = workerData.filter(w => w.owed_inr > 0).reduce((s, w) => s + w.owed_inr, 0);
+            const reviewCount = recData.filter(r => r.needs_manual_review === 'True' || r.needs_manual_review === true).length;
+
+            document.getElementById('c-underpaid').textContent = underpaid;
+            document.getElementById('c-owed').textContent = '₹' + totalOwed.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+            document.getElementById('c-review').textContent = reviewCount;
+            document.getElementById('c-overpaid').textContent = overpaid;
+            document.getElementById('c-exact').textContent = exact;
+        }
+
+        // =====================
+        // RECONCILIATION TABLE
+        // =====================
+        function applyFilters() {
+            const status = document.getElementById('f-status').value;
+            const month = document.getElementById('f-month').value;
+            const search = document.getElementById('f-search').value.trim().toLowerCase();
+
+            filteredRec = recData.filter(r => {
+                const delta = r.delta_paise;
+                if (status === 'underpaid' && !(delta > 0)) return false;
+                if (status === 'overpaid' && !(delta < 0)) return false;
+                if (status === 'exact' && delta !== 0) return false;
+                if (status === 'review' && r.needs_manual_review !== 'True' && r.needs_manual_review !== true) return false;
+                if (month !== 'all' && !String(r.year_month).startsWith(month)) return false;
+                if (search && !String(r.phone_norm).includes(search)) return false;
+                return true;
+            });
+
+            // Sort
+            filteredRec.sort((a, b) => {
+                let av = a[sortCol], bv = b[sortCol];
+                if (isNaN(av)) av = -Infinity;
+                if (isNaN(bv)) bv = -Infinity;
+                return (av - bv) * sortDir;
+            });
+
+            currentPage = 1;
+            renderRecTable();
+        }
+
+        function renderRecTable() {
+            const start = (currentPage - 1) * PAGE_SIZE;
+            const page = filteredRec.slice(start, start + PAGE_SIZE);
+            const tbody = document.getElementById('recBody');
+
+            if (page.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="empty-state">No rows match current filters.</td></tr>';
+                document.getElementById('rowCount').textContent = '0 rows';
+                renderPagination();
+                return;
+            }
+
+            document.getElementById('rowCount').textContent = filteredRec.length + ' rows';
+            tbody.innerHTML = page.map((r, i) => {
+                const delta = r.delta_paise;
+                const deltaInr = isNaN(r.delta_inr) ? 0 : r.delta_inr;
+                const expected = isNaN(r.expected_paise) ? '—' : '₹' + (r.expected_paise / 100).toLocaleString('en-IN');
+                const actual = isNaN(r.actual_paise) ? '—' : '₹' + (r.actual_paise / 100).toLocaleString('en-IN');
+
+                let statusBadge, deltaStr;
+                if (isNaN(delta)) {
+                    statusBadge = '<span class="badge badge-muted">Unknown</span>';
+                    deltaStr = '—';
+                } else if (delta > 0) {
+                    statusBadge = '<span class="badge badge-red">Underpaid</span>';
+                    deltaStr = `<span style="color:var(--red)">-₹${deltaInr.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>`;
+                } else if (delta < 0) {
+                    statusBadge = '<span class="badge badge-yellow">Overpaid</span>';
+                    deltaStr = `<span style="color:var(--yellow)">+₹${Math.abs(deltaInr).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>`;
+                } else {
+                    statusBadge = '<span class="badge badge-green">Match</span>';
+                    deltaStr = '<span style="color:var(--green)">₹0</span>';
+                }
+
+                const conf = r.confidence || 'low';
+                const confBadge = conf === 'high'
+                    ? '<span class="badge badge-green">High</span>'
+                    : '<span class="badge badge-muted">Low</span>';
+
+                const reasons = (r.review_reason || '').split('|').filter(Boolean);
+                const reasonTags = reasons.map(reason => {
+                    const hi = reason.includes('mismatch') || reason.includes('no_worker') || reason.includes('no_rate');
+                    return `<span class="tag ${hi ? 'highlight' : ''}">${reason}</span>`;
+                }).join('');
+
+                const idx = start + i;
+                return `<tr onclick="showDetail(${idx})" class="${selectedRow === idx ? 'selected' : ''}">
+      <td>${r.phone_norm}</td>
+      <td>${r.year_month}</td>
+      <td class="text-right">${isNaN(r.shift_count) ? '—' : r.shift_count}</td>
+      <td class="text-right">${expected}</td>
+      <td class="text-right">${actual}</td>
+      <td class="text-right">${deltaStr}</td>
+      <td>${statusBadge}</td>
+      <td>${reasonTags || '<span style="color:var(--muted)">—</span>'}</td>
+      <td>${confBadge}</td>
+    </tr>`;
+            }).join('');
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const total = filteredRec.length;
+            const totalPages = Math.ceil(total / PAGE_SIZE);
+            const start = (currentPage - 1) * PAGE_SIZE + 1;
+            const end = Math.min(currentPage * PAGE_SIZE, total);
+            document.getElementById('pageInfo').textContent = `${start}–${end} of ${total}`;
+
+            const btns = document.getElementById('pageBtns');
+            let html = `<button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>← Prev</button>`;
+            const pages = [];
+            for (let p = 1; p <= totalPages; p++) {
+                if (p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1) pages.push(p);
+                else if (pages[pages.length - 1] !== '...') pages.push('...');
+            }
+            pages.forEach(p => {
+                if (p === '...') html += `<span class="page-btn" style="cursor:default">…</span>`;
+                else html += `<button class="page-btn ${p === currentPage ? 'current' : ''}" onclick="goPage(${p})">${p}</button>`;
+            });
+            html += `<button class="page-btn" onclick="goPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next →</button>`;
+            btns.innerHTML = html;
+        }
+
+        function goPage(p) {
+            const totalPages = Math.ceil(filteredRec.length / PAGE_SIZE);
+            if (p < 1 || p > totalPages) return;
+            currentPage = p;
+            renderRecTable();
+        }
+
+        // =====================
+        // DETAIL PANEL
+        // =====================
+        function showDetail(idx) {
+            selectedRow = idx;
+            const r = filteredRec[idx];
+            const panel = document.getElementById('detailPanel');
+            panel.classList.add('visible');
+            document.getElementById('splitLayout').style.gridTemplateColumns = '1fr 340px';
+
+            const delta = r.delta_paise;
+            const isUnderpaid = delta > 0;
+            const isOverpaid = delta < 0;
+            const deltaInr = isNaN(r.delta_inr) ? 0 : r.delta_inr;
+
+            document.getElementById('detailContent').innerHTML = `
+    <div class="detail-row"><span class="detail-key">Phone</span><span class="detail-val">${r.phone_norm}</span></div>
+    <div class="detail-row"><span class="detail-key">Period</span><span class="detail-val">${r.year_month}</span></div>
+    <div class="detail-row"><span class="detail-key">Shifts Logged</span><span class="detail-val">${isNaN(r.shift_count) ? '—' : r.shift_count}</span></div>
+    <div class="detail-row"><span class="detail-key">Expected Pay</span><span class="detail-val">₹${isNaN(r.expected_paise) ? '—' : (r.expected_paise / 100).toLocaleString('en-IN')}</span></div>
+    <div class="detail-row"><span class="detail-key">Actual Transferred</span><span class="detail-val">₹${isNaN(r.actual_paise) ? '—' : (r.actual_paise / 100).toLocaleString('en-IN')}</span></div>
+    <div class="detail-row">
+      <span class="detail-key">Delta</span>
+      <span class="detail-val ${isUnderpaid ? 'red' : isOverpaid ? 'yellow' : 'green'}">
+        ${isUnderpaid ? '-' : isOverpaid ? '+' : ''}₹${Math.abs(deltaInr).toLocaleString('en-IN', { maximumFractionDigits: 2 })}
+      </span>
+    </div>
+    <div class="detail-row"><span class="detail-key">Confidence</span><span class="detail-val">${r.confidence || '—'}</span></div>
+    <div class="detail-row"><span class="detail-key">Needs Review</span><span class="detail-val ${(r.needs_manual_review === 'True' || r.needs_manual_review === true) ? 'yellow' : 'green'}">${(r.needs_manual_review === 'True' || r.needs_manual_review === true) ? 'Yes' : 'No'}</span></div>
+    <div style="margin-top:12px">
+      <div class="detail-key" style="margin-bottom:8px">Review Reasons</div>
+      <div>${(r.review_reason || '').split('|').filter(Boolean).map(t => `<span class="tag highlight">${t}</span>`).join(' ') || '<span style="color:var(--green)">None — clean row</span>'}</div>
+    </div>
+    ${isUnderpaid ? `<div style="margin-top:16px;padding:10px 12px;background:rgba(255,79,79,0.08);border:1px solid rgba(255,79,79,0.2);border-radius:3px;font-size:11px;color:var(--red);font-family:var(--font-mono)">Worker is owed ₹${deltaInr.toLocaleString('en-IN', { maximumFractionDigits: 2 })} for this period.</div>` : ''}
+  `;
+            renderRecTable(); // re-render to highlight
+        }
+
+        function closeDetail() {
+            selectedRow = null;
+            document.getElementById('detailPanel').classList.remove('visible');
+            document.getElementById('splitLayout').style.gridTemplateColumns = '1fr';
+            renderRecTable();
+        }
+
+        // =====================
+        // WORKER SUMMARY TABLE
+        // =====================
+        function applyWorkerFilters() {
+            const status = document.getElementById('fw-status').value;
+            filteredWorker = workerData.filter(w => {
+                if (status === 'underpaid' && !(w.total_delta > 0)) return false;
+                if (status === 'overpaid' && !(w.total_delta < 0)) return false;
+                if (status === 'exact' && w.total_delta !== 0) return false;
+                return true;
+            });
+            filteredWorker.sort((a, b) => {
+                let av = a[workerSortCol], bv = b[workerSortCol];
+                if (isNaN(av)) av = -Infinity;
+                if (isNaN(bv)) bv = -Infinity;
+                return (av - bv) * workerSortDir;
+            });
+            document.getElementById('workerCount').textContent = filteredWorker.length + ' workers';
+            renderWorkerTable();
+        }
+
+        function renderWorkerTable() {
+            const tbody = document.getElementById('workerBody');
+            tbody.innerHTML = filteredWorker.map(w => {
+                const owed = w.owed_inr;
+                let badge, owedStr;
+                if (w.total_delta > 0) {
+                    badge = '<span class="badge badge-red">Underpaid</span>';
+                    owedStr = `<span style="color:var(--red)">₹${owed.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>`;
+                } else if (w.total_delta < 0) {
+                    badge = '<span class="badge badge-yellow">Overpaid</span>';
+                    owedStr = `<span style="color:var(--yellow)">-₹${Math.abs(owed).toLocaleString('en-IN', { maximumFractionDigits: 2 })}</span>`;
+                } else {
+                    badge = '<span class="badge badge-green">Match</span>';
+                    owedStr = '<span style="color:var(--green)">₹0</span>';
+                }
+                return `<tr>
+      <td>${w.phone_norm}</td>
+      <td class="text-right">₹${(w.total_expected / 100).toLocaleString('en-IN')}</td>
+      <td class="text-right">₹${(w.total_actual / 100).toLocaleString('en-IN')}</td>
+      <td class="text-right">${owedStr}</td>
+      <td class="text-right">${w.periods}</td>
+      <td>${badge}</td>
+    </tr>`;
+            }).join('');
+        }
+
+        // =====================
+        // BUG BREAKDOWN
+        // =====================
+        function renderBugBreakdown() {
+            const reasons = {};
+            recData.forEach(r => {
+                (r.review_reason || '').split('|').filter(Boolean).forEach(reason => {
+                    reasons[reason] = (reasons[reason] || 0) + 1;
+                });
+            });
+            const total = recData.length;
+            const html = `<div class="table-wrapper"><table>
+    <thead><tr><th>Review Reason</th><th>Row Count</th><th>% of Total</th><th>Severity</th></tr></thead>
+    <tbody>
+    ${Object.entries(reasons).sort((a, b) => b[1] - a[1]).map(([k, v]) => {
+                const pct = ((v / total) * 100).toFixed(1);
+                const sev = k.includes('no_worker') || k.includes('no_rate') ? '<span class="badge badge-red">Critical</span>'
+                    : k.includes('overlap') ? '<span class="badge badge-yellow">High</span>'
+                        : k.includes('mismatch') ? '<span class="badge badge-yellow">High</span>'
+                            : '<span class="badge badge-muted">Medium</span>';
+                return `<tr><td><span class="tag highlight">${k}</span></td><td class="text-right">${v}</td><td class="text-right">${pct}%</td><td>${sev}</td></tr>`;
+            }).join('')}
+    </tbody>
+  </table></div>`;
+            document.getElementById('bugsBreakdown').innerHTML = html;
+        }
+
+        // =====================
+        // SORTING
+        // =====================
+        function sortBy(col) {
+            if (sortCol === col) { sortDir *= -1; }
+            else { sortCol = col; sortDir = -1; }
+            document.querySelectorAll('th[id]').forEach(th => th.classList.remove('sorted'));
+            const th = document.getElementById('th-' + col.replace('_paise', '').replace('_', ''));
+            if (th) { th.classList.add('sorted'); th.querySelector('.sort-icon').textContent = sortDir === -1 ? '↓' : '↑'; }
+            applyFilters();
+        }
+
+        function sortWorker(col) {
+            if (workerSortCol === col) { workerSortDir *= -1; }
+            else { workerSortCol = col; workerSortDir = -1; }
+            applyWorkerFilters();
+        }
+
+        // =====================
+        // TABS
+        // =====================
+        function switchTab(name) {
+            ['shift', 'worker', 'bugs'].forEach(t => {
+                document.getElementById('view-' + t).style.display = t === name ? '' : 'none';
+                document.getElementById('tab-' + t).classList.toggle('active', t === name);
+            });
+        }
+
+        // =====================
+        // MISC
+        // =====================
+        function clearFilters() {
+            document.getElementById('f-status').value = 'all';
+            document.getElementById('f-month').value = 'all';
+            document.getElementById('f-search').value = '';
+            applyFilters();
+        }
+
+        function exportCSV() {
+            const cols = ['phone_norm', 'year_month', 'shift_count', 'expected_paise', 'actual_paise', 'delta_paise', 'delta_inr', 'needs_manual_review', 'review_reason', 'confidence'];
+            const csv = [cols.join(','), ...filteredRec.map(r => cols.map(c => r[c] ?? '').join(','))].join('\n');
+            download('reconciled_filtered.csv', csv);
+        }
+
+        function exportWorkerCSV() {
+            const cols = ['phone_norm', 'total_expected', 'total_actual', 'total_delta', 'periods', 'owed_inr'];
+            const csv = [cols.join(','), ...filteredWorker.map(r => cols.map(c => r[c] ?? '').join(','))].join('\n');
+            download('worker_summary_filtered.csv', csv);
+        }
+
+        function download(filename, text) {
+            const a = document.createElement('a');
+            a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(text);
+            a.download = filename;
+            a.click();
+        }
+
+        // =====================
+        // INIT
+        // =====================
+        loadData();
+    </script>
+</body>
+</html>
