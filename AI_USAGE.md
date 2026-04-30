@@ -1,15 +1,81 @@
 # AI Usage Log
 
-This document tracks how AI was utilized to accelerate the development of this take-home assignment, highlighting where it excelled and where it stumbled.
+This document outlines how AI tools were used during the development of this assignment, including where they accelerated progress and where human judgment was required to correct or guide outputs.
+
+---
 
 ## Where AI Helped
-* **Data Munging (Pandas):** Writing complex grouped aggregations and outer joins in Pandas is syntax-heavy. AI was excellent at instantly scaffolding the `groupby().agg()` logic for the expected/actual pay aggregations.
-* **Rapid UI Styling:** Generating the initial layout, dark-mode CSS variables, and flexbox structural code for the dashboard was heavily accelerated by AI. It saved hours of boilerplate styling.
-* **Debugging macOS Collisions:** When the Flask server refused to run on port 5000, AI quickly identified that the macOS "AirPlay Receiver" silently occupies port 5000 and suggested fetching against `127.0.0.1` instead of `localhost` to force IPv4 resolution.
 
-## Where AI Didn't Help (And Stumbled)
-* **Contextual Nuance in Data:** The AI struggled initially with the prompt instruction: *"phone/name reflect current registered identity, not historical"*. Because the raw Pandas join returned 0 errors (historical phones technically existed as duplicate rows in `workers.csv`), the AI assumed the code was perfectly fine. It lacked the business logic context to realize that "0 errors" actually meant a single human was being tracked as two separate financial entities. 
-* **Spotting Timezone Subtleties:** When instructed to look for timezone bugs, the AI initially assumed the standard `tz_convert('Asia/Kolkata')` function was sufficient. I had to manually guide it to realize that `vendor_b_v1.0` was logging `work_date` incorrectly based on raw UTC strings, requiring a hardcoded manual override inside the script.
+### 1. Data Processing (Pandas)
+AI significantly accelerated the implementation of Pandas operations, especially:
+- grouped aggregations (`groupby().agg()`)
+- outer joins for reconciliation
+- column transformations and cleanup
 
-## The Takeaway
-AI was an incredible co-pilot for syntax generation and boilerplate UI, but it required constant human "steering" to navigate the intentional business-logic traps hidden in the assignment's data architecture.
+This reduced time spent on syntax-heavy code and allowed focus on logic design.
+
+---
+
+### 2. UI Scaffolding
+AI helped generate:
+- initial dashboard layout
+- basic styling (including dark mode variables)
+- component structure for displaying reconciliation data
+
+This eliminated repetitive frontend setup work.
+
+---
+
+### 3. Environment Debugging
+AI helped quickly diagnose a local development issue where port `5000` was occupied by macOS (AirPlay Receiver), and suggested using `127.0.0.1` to avoid resolution issues.
+
+---
+
+## Where AI Required Correction
+
+### 1. Identity Matching Logic
+AI initially suggested a straightforward join on normalized phone numbers.  
+However, the prompt explicitly notes that:
+
+> “phone/name reflect current registered identity, not historical”
+
+This required rethinking the approach:
+- detecting duplicate identities across time
+- implementing canonical mapping based on most recent registration
+- acknowledging the risk of merging identities based on names
+
+AI did not surface this issue independently; it required manual reasoning about data semantics.
+
+---
+
+### 2. Timezone Handling
+AI assumed standard timezone conversion (`tz_convert`) was sufficient.
+
+However, deeper inspection revealed:
+- different vendor apps handled timestamps inconsistently
+- `vendor_b_v1.0` logged `work_date` incorrectly (based on UTC rather than local time)
+
+This required:
+- detecting vendor-specific behavior
+- applying a targeted correction for affected rows
+
+AI needed explicit guidance to reach this conclusion.
+
+---
+
+## Takeaway
+
+AI was highly effective for:
+- accelerating implementation
+- reducing boilerplate
+- assisting with debugging
+
+However, it struggled with:
+- interpreting ambiguous business rules
+- identifying data inconsistencies hidden behind “clean” joins
+
+Human judgment was essential for:
+- correctly interpreting identity and timezone edge cases
+- validating assumptions against real-world system behavior
+
+The final solution reflects a combination of AI-assisted implementation and manual reasoning over data integrity issues.
