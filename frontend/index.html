@@ -1120,9 +1120,11 @@
                 }
 
                 const conf = r.confidence || 'low';
-                const confBadge = conf === 'high'
-                    ? '<span class="badge badge-green">High</span>'
-                    : '<span class="badge badge-muted">Low</span>';
+                const confBadge = conf === 'high' 
+                    ? '<span class="badge badge-green">High</span>' 
+                    : conf === 'medium'
+                        ? '<span class="badge badge-yellow">Medium</span>'
+                        : '<span class="badge badge-muted">Low</span>';
 
                 const reasons = (r.review_reason || '').split('|').filter(Boolean);
                 const reasonTags = reasons.map(reason => {

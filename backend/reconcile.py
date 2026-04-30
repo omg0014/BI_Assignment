@@ -219,9 +219,12 @@ def run_reconciliation():
     # 14. CONFIDENCE SCORING
 
     def compute_confidence(row):
-        if row['needs_manual_review']:
+        reasons = str(row['review_reason']).split('|') if pd.notna(row['review_reason']) else []
+        data_corruption_reasons = [r for r in reasons if r and r != 'amount_mismatch']
+        
+        if len(data_corruption_reasons) > 0:
             return 'low'
-        if pd.notna(row['delta_paise']) and abs(row['delta_paise']) > 0:
+        if 'amount_mismatch' in reasons:
             return 'medium'
         return 'high'
 
