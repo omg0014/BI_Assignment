@@ -52,7 +52,7 @@ bharat_intelligence/
 
 ---
 
-## ⚙️ How to Run Locally
+##  How to Run Locally
 
 ### 1. Setup (First Time Only)
 
