@@ -56,6 +56,11 @@ bharat_intelligence/
 
 ### 1. Start Backend (Flask API)
 
+Setup
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pandas flask flask-cors
+
 ```bash
 cd backend
 source ../.venv/bin/activate
