@@ -52,15 +52,17 @@ bharat_intelligence/
 
 ---
 
-##  How to Run Locally
+## ⚙️ How to Run Locally
 
-### 1. Start Backend (Flask API)
+### 1. Setup (First Time Only)
 
-Setup
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install pandas flask flask-cors
+```
 
+### Start Backend (Flask API)
 ```bash
 cd backend
 source ../.venv/bin/activate
