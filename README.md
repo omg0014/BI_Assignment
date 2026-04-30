@@ -102,6 +102,11 @@ http://127.0.0.1:5000
 Open a new terminal:
 
 ```bash
+python3 -m http.server 8080
+```
+or 
+
+```bash
 python -m http.server 8080
 ```
 
