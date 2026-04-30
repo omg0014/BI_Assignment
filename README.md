@@ -59,7 +59,13 @@ bharat_intelligence/
 The backend requires Python and a few dependencies (`Flask`, `pandas`, `flask-cors`) to process the CSV datasets.
 
 ```bash
-# Navigate to the backend directory
+python3 -m venv .venv
+source .venv/bin/activate
+pip install pandas flask flask-cors
+```
+
+### Start Backend (Flask API)
+```bash
 cd backend
 
 # Create a virtual environment
