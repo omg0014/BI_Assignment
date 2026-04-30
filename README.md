@@ -54,22 +54,31 @@ bharat_intelligence/
 
 ##  How to Run Locally
 
-### 1. Setup (First Time Only)
+### 1. Setup & Start Backend (Flask API)
+
+The backend requires Python and a few dependencies (`Flask`, `pandas`, `flask-cors`) to process the CSV datasets.
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install pandas flask flask-cors
-```
-
-### Start Backend (Flask API)
-```bash
+# Navigate to the backend directory
 cd backend
-source ../.venv/bin/activate
+
+# Create a virtual environment
+python3 -m venv .venv
+
+# Activate the virtual environment
+# On macOS/Linux:
+source .venv/bin/activate
+# On Windows:
+# .venv\Scripts\activate
+
+# Install the required packages
+pip install -r requirements.txt
+
+# Run the Flask API server
 python app.py
 ```
 
-Backend will run at:
+The backend will automatically process the CSV files, write the reconciliation outputs, and run at:
 
 ```
 http://127.0.0.1:5000
