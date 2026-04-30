@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 from reconcile import run_reconciliation
 import pandas as pd
@@ -12,6 +12,10 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Run reconciliation on startup
 run_reconciliation()
+
+@app.route('/')
+def index():
+    return send_from_directory(os.path.join(os.path.dirname(BASE_DIR), 'frontend'), 'index.html')
 
 @app.route('/api/reconciliation')
 def get_reconciliation():
