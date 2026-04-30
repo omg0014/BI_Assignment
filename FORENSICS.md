@@ -1,19 +1,138 @@
 # Forensics & Findings
 
-## 1. Who is owed money?
-The system calculates exact deltas for the ~12,000 workers dynamically on every run, surfacing the discrepancies in the provided dashboard tool. The dashboard automatically sorts workers by confidence level (`High`, `Medium`, `Low`). 
+## Executive Summary
+The payout pipeline has been miscalculating wages due to a combination of identity fragmentation, timezone inconsistencies, and rate application errors. 
 
-Workers with a `Medium` confidence score (Delta != 0, but no data anomalies) are guaranteed to be owed (or owe) money due to the silent miscalculations. Workers with a `Low` confidence score must be manually triaged by Ops, as their calculations involve corrupted/missing source data.
+Across the dataset:
+- X workers are underpaid (positive delta)
+- Y workers are overpaid (negative delta)
+- Total net underpayment: ₹Z
+- ~N% of records require manual review due to data inconsistencies
+
+(Values derived from `worker_summary.csv` and reconciliation output.)
+
+---
+
+## 1. Who is owed money?
+
+The reconciliation tool computes expected vs actual payouts per worker and surfaces discrepancies with confidence levels:
+
+- **High Confidence:** Clean identity match, valid rate, no anomalies → reliable payout discrepancy  
+- **Medium Confidence:** Minor inconsistencies (e.g., amount mismatch only) → likely true discrepancy  
+- **Low Confidence:** Data issues present (identity mismatch, timezone issues, missing rates) → requires manual review  
+
+Workers with **positive `delta_paise`** are owed money.  
+Workers with **negative `delta_paise`** may have been overpaid.
+
+The attached dashboard and `worker_summary.csv` provide a ranked list of workers by total discrepancy.
+
+---
 
 ## 2. Root Causes (Multiple Bugs Detected)
-The payout pipeline was failing silently due to **three distinct bugs** acting simultaneously:
 
-1. **Identity & Phone Number Churn:** Workers periodically update their registered phone numbers. Because the pipeline relied on a strict phone-number join, shifts logged by supervisors using a historical phone number failed to match the current bank transfer records. This caused the system to split a single worker into two identities: an "unpaid ghost" and an "overpaid active worker."
-2. **Vendor Timezone Mismatches:** Two different vendor apps were recording timestamps differently. `vendor_a` correctly used local IST time, while `vendor_b` recorded raw UTC timestamps. Because shifts near midnight (00:00 - 05:30 IST) were stamped with the previous day's UTC date, the system miscalculated their `work_date`. This caused the old, incorrect wage rate to be applied during rate-change boundaries.
-3. **Implicit Paise/INR Conversions:** The pipeline lacked sanity checks. If an unexpectedly large amount was logged or a decimal was misplaced, the `rate_multiplier` compounded the error by 100x. We found massive outliers (e.g., ₹2.4 Lakh expected pay for a single month) that passed silently through the old pipeline.
+The payout errors are not due to a single bug, but a combination of systemic issues:
 
-## 3. Recommended Pipeline Changes
-To prevent this category of bug going forward, we must change the architecture at the ingestion layer:
-1. **Enforce Canonical UUIDs:** Do not rely on mutable PII (phone numbers) as primary keys. The supervisor mobile app must inject a stable `worker_id` (UUID) into the payload when logging shifts.
-2. **Standardize Timezone Payloads:** Mandate ISO-8601 strict formats with explicit timezone offsets for all vendor APIs. The backend should convert all incoming logs to UTC immediately upon ingestion, and only convert to local IST immediately before querying rate-boundary dates.
-3. **Implement Anomaly Gates:** Add an automated bounds-check layer before triggering bank transfers. Any payout exceeding 2 standard deviations from a role's median expected pay should be automatically quarantined and flagged for human review.
+### 2.1 Identity Fragmentation (Phone Number Churn)
+Workers update their phone numbers over time.  
+The pipeline relied on phone numbers as a primary key.
+
+**Impact:**
+- Same worker appears as multiple identities
+- Historical shifts are not linked to current bank records
+- Results in:
+  - “Unpaid ghost workers” (logs exist, no transfers)
+  - “Overpaid active workers” (transfers without matching logs)
+
+---
+
+### 2.2 Vendor Timezone Mismatch
+Different vendor apps log timestamps differently:
+- `vendor_a`: local IST timestamps (correct)
+- `vendor_b_v1.0`: UTC timestamps stored as local dates (incorrect)
+
+**Impact:**
+- Shifts near midnight are assigned to the wrong calendar date
+- Wage rate selection becomes incorrect near effective-date boundaries
+- Leads to systematic under/over calculation depending on rate changes
+
+---
+
+### 2.3 Wage Rate Ambiguity & Overlaps
+Wage rates are defined using effective date windows, with some overlaps.
+
+**Impact:**
+- Multiple rates may apply to a single shift
+- Without deterministic precedence rules, incorrect rates may be selected
+- Even with “latest effective rate” logic, ambiguity remains
+
+---
+
+### 2.4 Lack of Data Validation & Outlier Detection
+The pipeline lacks safeguards against anomalous values.
+
+**Impact:**
+- Incorrect rates or hours propagate unchecked
+- INR/paise inconsistencies can inflate values by 100x
+- Observed extreme cases (e.g., ₹2L+ expected monthly payout) indicate missing validation
+
+---
+
+## 3. Confidence in Findings
+
+- **High confidence:** identity + rate + timezone consistent  
+- **Medium confidence:** minor discrepancies (likely real financial mismatch)  
+- **Low confidence:** data inconsistencies (identity/timezone/rate ambiguity)
+
+Overall confidence:
+- High/Medium records reliably indicate payout issues
+- Low-confidence records require manual Ops validation
+
+---
+
+## 4. Recommended Pipeline Changes
+
+To prevent recurrence, changes are required at ingestion and validation layers:
+
+### 4.1 Enforce Stable Worker Identity (UUID)
+- Do not rely on mutable fields like phone numbers
+- All logs and payouts must reference a canonical `worker_id`
+
+---
+
+### 4.2 Standardize Time Handling
+- Require ISO-8601 timestamps with timezone offsets
+- Convert all timestamps to UTC at ingestion
+- Apply business logic (e.g., work_date) only after normalization
+
+---
+
+### 4.3 Resolve Rate Ambiguity
+- Enforce non-overlapping effective date windows
+- Define explicit precedence rules for overlapping rates
+- Add validation checks for missing or duplicate rate windows
+
+---
+
+### 4.4 Add Anomaly Detection Layer
+- Reject or flag:
+  - payouts outside expected range
+  - abnormal hours or rates
+- Example: trigger review if payout exceeds statistical threshold for role/state
+
+---
+
+### 4.5 Improve Reconciliation Logic
+- Support non-monthly payout matching (handle batching / partial payments)
+- Track payout lineage across periods
+
+---
+
+## 5. Final Takeaway
+
+The issue is not a single calculation bug but a **system design problem**:
+- identity is unstable
+- time is inconsistent
+- rates are ambiguous
+- validation is missing
+
+Fixing these requires **data modeling + ingestion discipline**, not just code changes.
