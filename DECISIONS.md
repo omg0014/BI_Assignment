@@ -2,24 +2,119 @@
 
 ## Why this Stack, Dedup, and UI?
 
-**The Stack:**
-I chose Python/Pandas for the backend because it excels at rapid, complex data munging, timezone manipulation, and vectorized math over thousands of rows. I chose Flask to serve the JSON API due to its lightweight setup. For the frontend, I chose Vanilla JS and CSS—avoiding React or complex build tools to ensure maximum execution speed, rapid iteration, and guaranteed portability for a take-home assignment.
+### The Stack
+I chose Python + Pandas for the backend because the core problem is data reconciliation:
+- joining heterogeneous sources,
+- applying effective-dated logic,
+- handling timezones,
+- and performing vectorized calculations.
 
-**The Deduplication Strategy:**
-Because `workers.csv` acts as the source of truth for *current* identity but `supervisor_logs.csv` contains *historical* data, I deduplicated identities based on their normalized Name + State. I sorted the registry by `registered_on` to find their newest active phone number, and mapped all historical shift logs to that canonical phone number *before* aggregation. This unifies their lifetime expected pay.
+Pandas allowed rapid iteration on these transformations without schema overhead.
 
-**The UI:**
-I built a triage-focused dashboard. Operations teams don't need raw data; they need actionable alerts. The UI groups workers by Confidence Score (`High`, `Medium`, `Low`) and explicitly lists the `review_reason` flags (e.g., `date_mismatch`, `amount_anomaly`) directly inline.
+Flask was used as a minimal API layer to expose results for inspection.  
+For the frontend, I chose Vanilla JS + CSS to avoid build complexity and prioritize speed of execution and portability for a take-home assignment.
+
+---
+
+### The Reconciliation Strategy (Key Decision)
+This problem is explicitly *not* solvable via a single JOIN.
+
+I implemented a multi-step pipeline:
+1. Normalize identity (phones, names)
+2. Map historical logs → canonical worker identity
+3. Resolve effective-dated wage rates per shift
+4. Compute expected pay at shift level
+5. Aggregate expected and actual payouts at a monthly level
+6. Reconcile differences and propagate uncertainty flags
+
+I chose **monthly aggregation (`year_month`)** as a practical compromise:
+- aligns reasonably with payroll cycles
+- simplifies matching expected vs actual transfers
+- avoids complex many-to-many matching between shifts and bank transfers
+
+Trade-off:
+- does not handle cross-month batching or partial payouts perfectly (documented in ASSUMPTIONS.md)
+
+---
+
+### The Deduplication Strategy
+`workers.csv` reflects *current identity*, while `supervisor_logs.csv` contains *historical identity*.
+
+To unify identities:
+- I normalized names and phones
+- sorted workers by `registered_on` (latest first)
+- mapped each normalized name → latest known phone
+- rewrote historical logs to use this canonical identity
+
+This allows aggregation of lifetime earnings for a worker despite phone number changes.
+
+Trade-off:
+- assumes normalized names uniquely identify a worker
+- risks merging distinct individuals with similar names (documented in ASSUMPTIONS.md)
+
+---
+
+### The UI
+The UI is designed for **Ops triage, not exploration**.
+
+It focuses on:
+- grouping workers by confidence (`High`, `Medium`, `Low`)
+- surfacing discrepancies (`delta`)
+- displaying explicit `review_reason` flags inline
+
+This enables:
+- quick identification of clean discrepancies (actionable payouts)
+- separation of cases requiring manual investigation
 
 ---
 
 ## 3 Things I Got Wrong on Purpose
 
-To meet the 16-hour deadline, I made deliberate trade-offs that would be unacceptable in production:
+These were deliberate trade-offs to meet the time constraint:
 
-1. **Using CSVs as a Database:**
-   The backend processes the raw CSV files into pandas DataFrames in-memory on every startup. In production, this data should be migrated to a relational database (like PostgreSQL) to support efficient indexing, concurrent reads, and ACID compliance for payouts.
-2. **Client-Side Heavy Rendering:**
-   The frontend fetches the entire reconciled JSON payload at once and handles all filtering and sorting client-side. While perfectly fast for 12,000 workers, this will crash the browser tab if the company scales to 1,000,000 workers. Server-side pagination is required long-term.
-3. **Hardcoded Anomaly Thresholds:**
-   To catch the massive paise/INR bugs, I hardcoded a safeguard threshold of ₹1,00,000 (10M paise). In a real financial pipeline, this should be a dynamic statistical threshold (e.g., > 99th percentile for that specific role/state) to account for natural wage inflation or high-tier workers.
+### 1. Using CSVs as a Database
+The pipeline reads CSVs into memory on each run.
+
+In production:
+- data should live in a relational database (e.g., PostgreSQL)
+- indexed joins and historical tracking would improve correctness and performance
+- reconciliation should run incrementally, not from scratch
+
+---
+
+### 2. Monthly Aggregation Instead of True Matching
+I aggregated payouts by `year_month` rather than performing exact matching between shifts and bank transfers.
+
+Why:
+- significantly reduces complexity
+- avoids ambiguous many-to-many matching
+
+Trade-off:
+- fails when:
+  - payments are batched across months
+  - payouts are split or delayed
+
+This is the largest correctness compromise in the system.
+
+---
+
+### 3. Hardcoded Anomaly Thresholds
+I used a fixed threshold (₹1,00,000) to detect extreme payout anomalies.
+
+In production:
+- thresholds should be dynamic (e.g., percentile-based per role/state)
+- anomaly detection should be statistical, not rule-based
+
+---
+
+## Final Thought
+
+The system is intentionally designed to be:
+- **correct enough to surface real discrepancies**
+- **transparent about uncertainty**
+- **fast to iterate on**
+
+Rather than attempting perfect matching, the design prioritizes:
+> surfacing issues + enabling human triage
+
+which is more realistic for messy real-world financial pipelines.
