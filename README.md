@@ -9,7 +9,7 @@ A full-stack system to detect and explain wage miscalculations across field work
 
 ---
 
-## 🚀 What This System Does
+##  What This System Does
 
 This tool reconstructs **expected wages** and compares them against **actual payouts**, then surfaces discrepancies for Ops teams.
 
@@ -29,7 +29,7 @@ This tool reconstructs **expected wages** and compares them against **actual pay
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
 
 ```
 bharat_intelligence/
@@ -52,7 +52,7 @@ bharat_intelligence/
 
 ---
 
-## ⚙️ How to Run Locally
+##  How to Run Locally
 
 ### 1. Start Backend (Flask API)
 
@@ -91,7 +91,7 @@ http://localhost:8080/frontend/
 
 ---
 
-## 📊 Outputs Generated
+##  Outputs Generated
 
 Running the backend generates:
 
@@ -114,7 +114,7 @@ Running the backend generates:
 
 ---
 
-## 🧠 Key Design Highlights
+##  Key Design Highlights
 
 * Handles **messy real-world identity (phone changes)**
 * Fixes **timezone inconsistencies across vendors**
@@ -124,7 +124,7 @@ Running the backend generates:
 
 ---
 
-## ⚠️ Known Limitations (Intentional)
+##  Known Limitations (Intentional)
 
 * Uses **monthly aggregation** instead of exact transfer matching
 * Name-based identity fallback may merge similar workers
@@ -138,7 +138,7 @@ All trade-offs are documented in:
 
 ---
 
-## 📄 Key Deliverables
+##  Key Deliverables
 
 * `FORENSICS.md` → Findings & root cause analysis (**most important**)
 * `DECISIONS.md` → Design trade-offs
@@ -147,7 +147,7 @@ All trade-offs are documented in:
 
 ---
 
-## 🧪 Quick Test
+##  Quick Test
 
 After starting backend, open:
 
@@ -164,7 +164,7 @@ This returns:
 
 ---
 
-## ⚠️ macOS Note
+##  macOS Note
 
 If Flask fails with:
 
@@ -177,7 +177,7 @@ Disable **AirPlay Receiver** in System Settings
 
 ---
 
-## 🎯 Design Philosophy
+##  Design Philosophy
 
 This system is intentionally designed to:
 
